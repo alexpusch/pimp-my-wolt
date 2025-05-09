@@ -87,6 +87,8 @@
     const additionalChargePerGuest = Number(
       (orderAdditionalCharge / guestsOrders.length).toFixed(2)
     );
+    const woltPlusCharge = 1;
+
     const guestDebts = guestsOrders.map((guestOrder) => {
       const cibusName = guests.find(
         (guest) => guest.woltName === guestOrder.name
@@ -94,7 +96,7 @@
       return {
         woltName: guestOrder.name,
         cibusName,
-        debt: guestOrder.price + additionalChargePerGuest,
+        debt: guestOrder.price + additionalChargePerGuest + woltPlusCharge,
       };
     });
     const settledGuests = await setGuestsDebts(guestDebts);
@@ -141,8 +143,8 @@
     const splitMessage =
       settledGuests.length > 0
         ? " הופה! הצלחנו לפצל " +
-          settledGuests.length +
-          " תשלומים עפ״י המיפוי בקבוצה. "
+        settledGuests.length +
+        " תשלומים עפ״י המיפוי בקבוצה. "
         : "";
     const splitSpan = document.createElement("span");
     splitSpan.appendChild(document.createTextNode(splitMessage));
@@ -153,8 +155,8 @@
       leftToSplit && settledGuests.length > 0
         ? "שמנו לב כי יתר המזמינים אינם ממופים - נסו את הפיצול האוטומטי שלנו. "
         : leftToSplit
-        ? `לא הצלחנו לפצל תשלומים עפ״י המיפוי בקבוצה. נסו את הפיצול האוטומטי שלנו`
-        : "";
+          ? `לא הצלחנו לפצל תשלומים עפ״י המיפוי בקבוצה. נסו את הפיצול האוטומטי שלנו`
+          : "";
     const settledSpan = document.createElement("span");
     settledSpan.appendChild(document.createTextNode(settledMessage));
     div.appendChild(settledSpan);
