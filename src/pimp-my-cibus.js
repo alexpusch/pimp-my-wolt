@@ -143,9 +143,10 @@
   }
 
   async function autoMatchCibusNameToBet(debts) {
-    const cibusNames = getAllCibusNames();
+    const remianingNames = getAllCibusNames();
+
     const woltNames = debts.map(({ woltName }) => woltName);
-    const autoMapping = await getAutoMatch({ cibusNames, woltNames });
+    const autoMapping = await getAutoMatch({ cibusNames: remianingNames, woltNames });
     const cibusToWolt = autoMapping.reduce((o, item) => {
       o[item.woltName] = item.cibusName;
       return o;
@@ -267,7 +268,9 @@
     orderAdditionalCharge,
     totalOrderPrice,
   }) {
-    const allCibusUsersAvailable = getAllCibusNames();
+    const remianingNames = getAllCibusNames();
+    const allCibusUsersAvailable = remianingNames.concat(settledGuests.map((guest) => guest.cibusName));
+
     const currentCibusUser = getCurrentUserName();
     const currentUser =
       (await allGuests).find((guest) => guest.cibusName === currentCibusUser)
@@ -284,7 +287,9 @@
   }
 
   async function publishAutoSplitPaymentEvent({ settledGuests, guestsOrders }) {
-    const allCibusUsersAvailable = getAllCibusNames();
+    const remianingNames = getAllCibusNames();
+    const allCibusUsersAvailable = remianingNames.concat(settledGuests.map((guest) => guest.cibusName));
+
     const currentCibusUser = getCurrentUserName();
     const currentUser =
       (await allGuests).find((guest) => guest.cibusName === currentCibusUser)
