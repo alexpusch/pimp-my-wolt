@@ -1,26 +1,51 @@
-(function () {
+(async function () {
+  function waitForApp() {
+    if (document.querySelector("app-root") !== null) return;
+    setTimeout(() => waitForApp(), 100);
+  }
+
+  waitForApp();
+
+  console.log("Pimp my Cibus: Detected payment button, handling payment split...");
+
   const logoUrl = chrome.runtime.getURL(
     "assets/icons/pimp-my-wolt-icon-128.png"
   );
   const loaderUrl = chrome.runtime.getURL("/assets/loader.gif");
   const { groupManager, biLogger } = window.pimpMyWolt;
-  const allGuests = groupManager.getAllGuests();
 
-  // const isHebrewCibus = !!getElementWithText("div", "עברית");
-  const isHebrewCibus = true; // TODO - detect language properly
-
+  const isHebrewCibus = !!getElementWithText("div", "עברית")
   const getCurrentLanguage = (english, hebrew) => isHebrewCibus ? hebrew : english
 
   const texts = {
     paymentButton: getCurrentLanguage("Order with Cibus", "אישור התשלום באמצעות סיבוס"),
-    addFriendsButton: getCurrentLanguage("Add friends to sharing", "הוספת חברים לחלוקה"),
-    chooseFriendButton: getCurrentLanguage("Choose friend", " בחירת חבר/ה ")
-  }
-
-
-  const paymentButtonSettings = {
-    settledAttribute: "settled",
+    addFriendToShareButton: getCurrentLanguage("Add friends to sharing", "הוספת חברים לחלוקה"),
+    chooseFriendButton: getCurrentLanguage("Choose friend", " בחירת חבר/ה "),
+    currentUserRegEx: getCurrentLanguage(/Hi, (.+)/, /היי, (.+)/)
   };
+
+  const selectors = {
+    splitPaymentWithFriendsToggle() { return document.querySelector("app-toggle-button .ng-toggle-switch-button") },
+    addFriendsToShareButton() { return getElementWithText("a", texts.addFriendToShareButton) },
+    chooseFriendButton() { return getElementWithText("span", texts.chooseFriendButton) },
+    chooseFriendDeleteButton() {
+      return this.chooseFriendButton().closest("tr").querySelector(".del")
+    },
+    friendMenuItem(name) { return getElementWithText("span", name) },
+    friendPaymentTableRow(name) { return getElementWithText("span", name) },
+    friendPaymentInput(name) {
+      const guestEl = this.friendPaymentTableRow(name);
+      return guestEl?.closest("tr")?.querySelector("input");
+    },
+    currentUserName() {
+      const currentUserEl = document.querySelector("app-oauth-pay b")
+      const match = texts.currentUserRegEx.exec(currentUserEl.innerText);
+      return match?.[1];
+    },
+    allFriendsInMenu() {
+      return [...document.querySelectorAll(".friends-menu-item")].map((e) => e?.innerText);
+    }
+  }
 
   const automaticPaymentContent = {
     divId: "postPaymentDiv-pimpMyWolt",
@@ -31,32 +56,6 @@
     divId: "messageDiv-pimpMyWolt",
     containerSelector: "app-order-split"
   };
-
-  const paymentSplitButtonSelector = "app-toggle-button .ng-toggle-switch-core";
-    const currentUserNameSelector = "app-oauth-pay b";
-
-  const getPaymentButton = () => getElementWithText("a", texts.paymentButton);
-  const isPaymentButtonExists = () => Boolean(getPaymentButton());
-  const isPaymentSettled = () => {
-    const paymentButton = getPaymentButton();
-    const attribute = paymentButton?.getAttribute(
-      paymentButtonSettings.settledAttribute
-    );
-    return attribute === "true";
-  };
-
-  const setPaymentSettled = () => {
-    const paymentButton = getPaymentButton();
-    paymentButton?.setAttribute(paymentButtonSettings.settledAttribute, "true");
-  };
-
-  function getCurrentUserName() {
-    const currentUser = document.querySelector(currentUserNameSelector).innerText;
-    const nameRegEx = getCurrentLanguage(/Hi, (.+)/, /היי, (.+)/);
-    const match = nameRegEx.exec(currentUser);
-
-    return match?.[1];
-  }
 
   function getElementWithText(element, text) {
     const xpath = `//${element}[contains(., "${text}")]`;
@@ -86,8 +85,7 @@
       chrome.storage.local.get(items, (result) => res(result));
     });
 
-  async function handleMappingPayment() {
-    const guests = await allGuests;
+  async function handleMappingPayment(groupMembers, allCibusFriends) {
     const {
       totalOrderPrice,
       guestsOrders,
@@ -113,8 +111,8 @@
       (orderAdditionalCharge / guestsOrders.length).toFixed(2)
     );
 
-    const currentUserName = getCurrentUserName();
-    const currentWoltName = guests.find(
+    const currentUserName = selectors.currentUserName();
+    const currentWoltName = groupMembers.find(
       (guest) => guest.cibusName === currentUserName
     )?.woltName ?? currentUserName; // Fallback to cibus name
 
@@ -123,7 +121,7 @@
     );
 
     const guestDebts = guestsOrdersWithoutManager.map((guestOrder) => {
-      const cibusName = guests.find(
+      const cibusName = groupMembers.find(
         (guest) => guest.woltName === guestOrder.name
       )?.cibusName;
 
@@ -134,22 +132,21 @@
       };
     });
 
-    const settledGuests = await setGuestsDebts(guestDebts);
+    const settledGuests = await setGuestsDebts(guestDebts, allCibusFriends);
     publishSplitPaymentEvent({
       restaurant,
       settledGuests,
       guestsOrders,
       orderAdditionalCharge,
       totalOrderPrice,
+      allCibusFriends
     });
     return { settledGuests, guestDebts };
   }
 
-  async function autoMatchCibusNameToBet(debts) {
-    const remianingNames = getAllCibusNames();
-
+  async function autoMatchCibusNameToBet(debts, allCibusFriends) {
     const woltNames = debts.map(({ woltName }) => woltName);
-    const autoMapping = await getAutoMatch({ cibusNames: remianingNames, woltNames });
+    const autoMapping = await getAutoMatch({ cibusNames: allCibusFriends, woltNames });
     const cibusToWolt = autoMapping.reduce((o, item) => {
       o[item.woltName] = item.cibusName;
       return o;
@@ -162,16 +159,16 @@
     });
   }
 
-  async function autoSplitDebt(asyncDebts) {
+  async function autoSplitDebt(asyncDebts, allCibusFriends) {
     const debts = await asyncDebts;
-    const settledGuests = await setGuestsDebts(debts);
-    publishAutoSplitPaymentEvent({ settledGuests, guestsOrders: debts });
+    const settledGuests = await setGuestsDebts(debts, allCibusFriends);
+    publishAutoSplitPaymentEvent({ settledGuests, guestsOrders: debts, allCibusFriends });
     const autoPaymentDiv = document.querySelector(`#${automaticPaymentContent.divId}`);
     autoPaymentDiv.innerHTML =
       '<span style="font-weight: bold;">מקווים שעזרנו... &#128521;</span>';
   }
 
-  function getAutomaticContent({ settledGuests, guestDebts }) {
+  function getAutomaticContent({ settledGuests, guestDebts, allCibusFriends }) {
     const leftToSplit = settledGuests.length < guestDebts.length;
     const div = document.createElement("div");
     div.setAttribute("id", automaticPaymentContent.divId);
@@ -209,7 +206,7 @@
       textDiv.appendChild(document.createTextNode("פצל אוטומטית"));
       btn.appendChild(textDiv);
 
-      const settledNames = settledGuests.map((x) => x.name);
+      const settledNames = settledGuests.map((x) => x.woltName);
       const debts = guestDebts.filter(
         ({ woltName }) => !settledNames.includes(woltName)
       );
@@ -224,8 +221,8 @@
       }
       div.appendChild(debtsSummaryDiv);
 
-      const debtsWithAutoMatch = autoMatchCibusNameToBet(debts);
-      btn.onclick = () => autoSplitDebt(debtsWithAutoMatch);
+      const debtsWithAutoMatch = autoMatchCibusNameToBet(debts, allCibusFriends);
+      btn.onclick = () => autoSplitDebt(debtsWithAutoMatch, allCibusFriends);
       div.appendChild(btn);
     }
     return div;
@@ -250,18 +247,9 @@
     setContent(loaderImage);
   }
 
-  function handleAutomaticPayment({ settledGuests, guestDebts }) {
-    const content = getAutomaticContent({ settledGuests, guestDebts });
+  function handleAutomaticPayment({ settledGuests, guestDebts, allCibusFriends }) {
+    const content = getAutomaticContent({ settledGuests, guestDebts, allCibusFriends });
     setContent(content);
-  }
-
-  function getAllCibusNames() {
-    clickAddGuestButton();
-    const all_users = new Array(...document.querySelectorAll('.friends-menu-item span span'))
-      .map((e) => e?.innerText);
-    // close the menu
-    clickAddGuestButton();
-    return all_users;
   }
 
   async function publishSplitPaymentEvent({
@@ -270,14 +258,11 @@
     guestsOrders,
     orderAdditionalCharge,
     totalOrderPrice,
+    allCibusFriends
   }) {
-    const remianingNames = getAllCibusNames();
-    const allCibusUsersAvailable = remianingNames.concat(settledGuests.map((guest) => guest.cibusName));
-
-    const currentCibusUser = getCurrentUserName();
     const currentUser =
-      (await allGuests).find((guest) => guest.cibusName === currentCibusUser)
-        ?.woltName || currentCibusUser;
+      selectors.currentUserName();
+
     biLogger.logEvent("split_payment", {
       restaurant,
       userName: currentUser,
@@ -285,35 +270,27 @@
       guestsOrders,
       orderAdditionalCharge,
       totalOrderPrice,
-      allCibusUsersAvailable,
+      allCibusUsersAvailable: allCibusFriends,
     });
   }
 
-  async function publishAutoSplitPaymentEvent({ settledGuests, guestsOrders }) {
-    const remianingNames = getAllCibusNames();
-    const allCibusUsersAvailable = remianingNames.concat(settledGuests.map((guest) => guest.cibusName));
+  async function publishAutoSplitPaymentEvent({ settledGuests, guestsOrders, allCibusFriends }) {
+    const currentCibusUser = selectors.currentUserName();
 
-    const currentCibusUser = getCurrentUserName();
-    const currentUser =
-      (await allGuests).find((guest) => guest.cibusName === currentCibusUser)
-        ?.woltName || currentCibusUser;
     biLogger.logEvent("auto_split_payment", {
-      userName: currentUser,
+      userName: currentCibusUser,
       settledGuests,
       guestsOrders,
-      allCibusUsersAvailable,
+      allCibusUsersAvailable: allCibusFriends,
     });
   }
 
   async function setGuestDebt(cibusName, debt) {
-    const guestEl = await waitForValue(() =>
-      getElementWithText("span", cibusName)
-    );
+    const guestInputEl = selectors.friendPaymentInput(cibusName);
 
-    const inputEl = guestEl?.closest("tr")?.querySelector("input");
-    if (inputEl) {
-      inputEl.value = debt;
-      inputEl.dispatchEvent(
+    if (guestInputEl) {
+      guestInputEl.value = debt;
+      guestInputEl.dispatchEvent(
         new UIEvent("change", {
           view: window,
           bubbles: true,
@@ -327,33 +304,34 @@
     return false;
   }
 
-  async function setGuestsDebts(guestDebts) {
-    const settledGuests = [];
+  async function setGuestsDebts(guestDebts, allCibusFriends) {
+    const availableGuests = guestDebts.filter((guest) => allCibusFriends.includes(guest.cibusName));
 
-    // pick guests to add them to the split payment table
-    for (guestDebt of guestDebts) {
-      clickAddGuestButton();
-      clickChooseFriendButton();
+    for (guest of availableGuests) {
+      selectors.addFriendsToShareButton().click();
+      selectors.chooseFriendButton().click();
 
-      // try woltName = cibusName if no cibus name
-      let cibusName = guestDebt.cibusName ?? guestDebt.woltName;
-      let pickGuestEl = getElementWithText("span", cibusName);
+      let pickGuestEl = selectors.friendMenuItem(guest.cibusName);
 
-      await waitForValue(() =>
-        getElementWithText("span", cibusName)
-      );
-      
+      // we expect to find the guest in the list, but just in case
       if (!pickGuestEl) {
-        // click add guest button again to close the menu
-        clickAddGuestButton();
+        selectors.chooseFriendDeleteButton().click();
+        continue;
       }
+
+      pickGuestEl.click();
+
+      // wait for the guest to be added to the list before continuing
+      await waitForValue(() =>
+        selectors.friendPaymentTableRow(guest.cibusName)
+      );
     }
 
-    for (guestDebt of settledGuests) {
-        await setGuestDebt(guestDebt.name, guestDebt.price); 
+    for (guestDebt of availableGuests) {
+      await setGuestDebt(guestDebt.cibusName, guestDebt.debt);
     }
 
-    return settledGuests;
+    return availableGuests;
   }
 
   function waitForValue(f, attempts = 100) {
@@ -367,6 +345,18 @@
       }
       tryGetValue(attempts);
     });
+  }
+
+  function getAllCibusNames() {
+    selectors.addFriendsToShareButton().click();
+    selectors.chooseFriendButton().click();
+
+
+    const allCibusFriends = selectors.allFriendsInMenu();
+
+    selectors.chooseFriendDeleteButton().click();
+
+    return allCibusFriends;
   }
 
   function clickAddGuestButton() {
@@ -384,12 +374,14 @@
   setInterval(async () => {
     if (isPaymentButtonExists() && !isPaymentSettled()) {
       console.log("Pimp my Cibus: Detected payment button, handling payment split...");
-      setLoader()
-      setPaymentSettled();
-      clickEnablePaymentSplit();
 
-      const { settledGuests, guestDebts } = await handleMappingPayment();
-      handleAutomaticPayment({ settledGuests, guestDebts });
-    }
-  }, 100);
+  setLoader()
+  selectors.splitPaymentWithFriendsToggle().click();
+
+  const groupMembers = await groupManager.getAllGuests();
+  const allCibusFriends = getAllCibusNames();
+
+  const { settledGuests, guestDebts } = await handleMappingPayment(groupMembers, allCibusFriends);
+
+  handleAutomaticPayment({ settledGuests, guestDebts, allCibusFriends });
 })();
