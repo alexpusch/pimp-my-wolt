@@ -6,13 +6,17 @@
   const { groupManager, biLogger } = window.pimpMyWolt;
   const allGuests = groupManager.getAllGuests();
 
-  const isHebrewCibus = !!getElementWithText("div", "עברית");
+  // const isHebrewCibus = !!getElementWithText("div", "עברית");
+  const isHebrewCibus = true; // TODO - detect language properly
 
-  const getCurrentLangugue = (english, hebrew) => isHebrewCibus ? hebrew : english
+  const getCurrentLanguage = (english, hebrew) => isHebrewCibus ? hebrew : english
 
   const texts = {
-    paymentButton: getCurrentLangugue("Pay with Cibus", "אישור התשלום באמצעות סיבוס"),
+    paymentButton: getCurrentLanguage("Order with Cibus", "אישור התשלום באמצעות סיבוס"),
+    addFriendsButton: getCurrentLanguage("Add friends to sharing", "הוספת חברים לחלוקה"),
+    chooseFriendButton: getCurrentLanguage("Choose friend", " בחירת חבר/ה ")
   }
+
 
   const paymentButtonSettings = {
     settledAttribute: "settled",
@@ -29,10 +33,9 @@
   };
 
   const paymentSplitButtonSelector = "app-toggle-button .ng-toggle-switch-core";
-  const splitMenuOpenSelector = "app-order-split .mat-mdc-menu-trigger";
-  const currentUserNameSelector = "app-oauth-pay b";
+    const currentUserNameSelector = "app-oauth-pay b";
 
-  const getPaymentButton = () => getElementWithText("button", texts.paymentButton);
+  const getPaymentButton = () => getElementWithText("a", texts.paymentButton);
   const isPaymentButtonExists = () => Boolean(getPaymentButton());
   const isPaymentSettled = () => {
     const paymentButton = getPaymentButton();
@@ -49,7 +52,7 @@
 
   function getCurrentUserName() {
     const currentUser = document.querySelector(currentUserNameSelector).innerText;
-    const nameRegEx = getCurrentLangugue(/Hi, (.+)/, /היי, (.+)/);
+    const nameRegEx = getCurrentLanguage(/Hi, (.+)/, /היי, (.+)/);
     const match = nameRegEx.exec(currentUser);
 
     return match?.[1];
@@ -330,21 +333,24 @@
     // pick guests to add them to the split payment table
     for (guestDebt of guestDebts) {
       clickAddGuestButton();
+      clickChooseFriendButton();
 
       // try woltName = cibusName if no cibus name
       let cibusName = guestDebt.cibusName ?? guestDebt.woltName;
       let pickGuestEl = getElementWithText("span", cibusName);
 
-      if (pickGuestEl) {
-        pickGuestEl.click();
-
-        if (await setGuestDebt(cibusName, guestDebt.debt)) {
-          settledGuests.push({ name: guestDebt.woltName, price: guestDebt.debt });
-        }
-      } else {
+      await waitForValue(() =>
+        getElementWithText("span", cibusName)
+      );
+      
+      if (!pickGuestEl) {
         // click add guest button again to close the menu
         clickAddGuestButton();
       }
+    }
+
+    for (guestDebt of settledGuests) {
+        await setGuestDebt(guestDebt.name, guestDebt.price); 
     }
 
     return settledGuests;
@@ -364,7 +370,11 @@
   }
 
   function clickAddGuestButton() {
-    document.querySelector(splitMenuOpenSelector).click();
+    getElementWithText("a", texts.addFriendsButton).click();
+  }
+
+  function clickChooseFriendButton() {
+    getElementWithText("a", texts.chooseFriendButton).click();
   }
 
   function clickEnablePaymentSplit() {
@@ -373,7 +383,7 @@
 
   setInterval(async () => {
     if (isPaymentButtonExists() && !isPaymentSettled()) {
-
+      console.log("Pimp my Cibus: Detected payment button, handling payment split...");
       setLoader()
       setPaymentSettled();
       clickEnablePaymentSplit();
