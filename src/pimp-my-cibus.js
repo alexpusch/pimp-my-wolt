@@ -110,15 +110,15 @@
       }
     })
 
+    const currentUser = selectors.currentUserName();
     const matchedGuests = [...matchedByMapping, ...autoMatched];
-    const matchedGuestInCibus = matchedGuests.filter(match => allCibusFriends.find(cibusGuest => cibusGuest === match.cibusName));
-
     const missingGuests = guestsOrders.filter(guestOrder => {
       const match = matchedGuests.find(match => match.woltName === guestOrder.name);
-      return !match || !allCibusFriends.find(cibusGuest => cibusGuest === match.cibusName);
+      return !match || (match.cibusName !== currentUser && !allCibusFriends.find(cibusGuest => cibusGuest === match.cibusName));
     });
 
-    return { matchedGuests: matchedGuestInCibus, missingGuests };
+    const matchedGuestsWithoutCurrentUser = matchedGuests.filter(match => match.cibusName !== currentUser);
+    return { matchedGuests: matchedGuestsWithoutCurrentUser, missingGuests };
   }
 
   async function fetchGuestsDebts() {
@@ -144,18 +144,17 @@
     // Includes delivery and tip.
     const orderAdditionalCharge = totalOrderPrice - totalGuestsPrice;
     const additionalChargePerGuest = Number(
-      (orderAdditionalCharge / guestsOrders.length).toFixed(2)
+      orderAdditionalCharge / guestsOrders.length
     );
 
     const guestDebts = guestsOrders.map((guestOrder) => {
       return {
         name: guestOrder.name,
-        price: guestOrder.price + additionalChargePerGuest,
+        price: (guestOrder.price + additionalChargePerGuest).toFixed(2),
       };
     });
 
     return guestDebts;
-
   }
 
   function getLoaderUi() {
