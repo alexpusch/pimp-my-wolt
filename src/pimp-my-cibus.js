@@ -368,23 +368,8 @@
     return allCibusFriends;
   }
 
-  function clickAddGuestButton() {
-    getElementWithText("a", texts.addFriendsButton).click();
-  }
 
-  function clickChooseFriendButton() {
-    getElementWithText("a", texts.chooseFriendButton).click();
-  }
 
-  function clickEnablePaymentSplit() {
-    document.querySelector(paymentSplitButtonSelector).click();
-  }
-
-  setInterval(async () => {
-    if (isPaymentButtonExists() && !isPaymentSettled()) {
-      console.log("Pimp my Cibus: Detected payment button, handling payment split...");
-
-  setLoader()
   setContent(getLoaderUi());
 
   selectors.splitPaymentWithFriendsToggle().click();
