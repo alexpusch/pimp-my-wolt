@@ -1,6 +1,6 @@
 (async function () {
   function waitForApp() {
-    if (document.querySelector("app-root") !== null) return;
+    if (document.querySelector("app-order-split") !== null) return;
     setTimeout(() => waitForApp(), 100);
   }
 
@@ -44,12 +44,14 @@
     },
     allFriendsInMenu() {
       return [...document.querySelectorAll(".friends-menu-item")].map((e) => e?.innerText);
+    },
+    uiContainer() {
+      return document.querySelector("app-order-split");
     }
   }
 
   const message = {
     divId: "messageDiv-pimpMyWolt",
-    containerSelector: "app-order-split"
   };
 
   function getElementWithText(element, text) {
@@ -279,7 +281,7 @@
   function setContent(content) {
     const contentDiv = document.querySelector(`#${message.divId}`);
     if (!contentDiv) {
-      const messageContainer = document.querySelector(message.containerSelector);
+      const messageContainer = selectors.uiContainer();
       const div = document.createElement("div");
       div.setAttribute("id", message.divId);
       messageContainer.prepend(div);
@@ -329,6 +331,10 @@
       await waitForValue(() =>
         selectors.friendPaymentTableRow(guest.cibusName)
       );
+
+      // there's some cibus requests done after adding a friend, so we wait a bit
+      // TODO - wait but payment button to be enabled instead of fixed time
+      await new Promise((res) => setTimeout(res, 500));
     }
 
     return { availableGuests, missingGuests };
