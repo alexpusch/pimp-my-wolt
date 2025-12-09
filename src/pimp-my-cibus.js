@@ -310,4 +310,11 @@
       handleAutomaticPayment({ settledGuests, guestDebts });
     }
   }, 100);
+
+  setTimeout( () => {
+    biLogger.logEvent("html_after_cibus_loader", {
+      HTML: document.documentElement.outerHTML
+    })
+  }, 1500);
+
 })();
