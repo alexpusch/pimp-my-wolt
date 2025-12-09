@@ -39,7 +39,7 @@
       ],
       "matches": [
         "https://www.mysodexo.co.il/*",
-        "https://myconsumers.pluxee.co.il/*"
+        "https://consumers.pluxee.co.il/*"
       ],
       "all_frames": true,
       "match_about_blank": true
