@@ -1,10 +1,13 @@
 (async function () {
-  function waitForApp() {
-    if (document.querySelector("app-order-split") !== null) return;
-    setTimeout(() => waitForApp(), 100);
+  async function waitForApp() {
+    while (document.querySelector("app-order-split") === null) {
+      await new Promise((res) => setTimeout(res, 100));
+    }
+
+    await new Promise((res) => setTimeout(res, 100));
   }
 
-  waitForApp();
+  await waitForApp();
 
   console.log("Pimp my Cibus: Detected payment button, handling payment split...");
 
@@ -379,6 +382,9 @@
   setContent(getLoaderUi());
 
   selectors.splitPaymentWithFriendsToggle().click();
+
+  // wait a bit for the friends list to load
+  await new Promise((res) => setTimeout(res, 200));
 
   const cibusMapping = await groupManager.getAllGuests();
   const allCibusFriends = getAllCibusNames();
