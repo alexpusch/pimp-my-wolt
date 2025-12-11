@@ -381,6 +381,8 @@
 
   setContent(getLoaderUi());
 
+  await new Promise((res) => setTimeout(res, 200));
+
   selectors.splitPaymentWithFriendsToggle().click();
 
   // wait a bit for the friends list to load
