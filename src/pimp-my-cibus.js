@@ -24,10 +24,12 @@
     paymentButton: getCurrentLanguage("Order with Cibus", "אישור התשלום באמצעות סיבוס"),
     addFriendToShareButton: getCurrentLanguage("Add friends to sharing", "הוספת חברים לחלוקה"),
     chooseFriendButton: getCurrentLanguage("Choose friend", " בחירת חבר/ה "),
-    currentUserRegEx: getCurrentLanguage(/Hi, (.+)/, /היי, (.+)/)
+    currentUserRegEx: getCurrentLanguage(/Hi, (.+)/, /היי, (.+)/),
+    myChargeText: getCurrentLanguage("My charge", "החיוב שלי"),
   };
 
   const selectors = {
+    paymentButton() { return getElementWithText("button", texts.paymentButton) },
     splitPaymentWithFriendsToggle() { return document.querySelector("app-toggle-button .ng-toggle-switch-button") },
     addFriendsToShareButton() { return getElementWithText("a", texts.addFriendToShareButton) },
     chooseFriendButton() { return getElementWithText("span", texts.chooseFriendButton) },
@@ -50,6 +52,9 @@
     },
     uiContainer() {
       return document.querySelector("app-order-split");
+    },
+    myCharge() {
+      return getElementWithText("span", texts.myChargeText);
     }
   }
 
@@ -330,14 +335,10 @@
 
       pickGuestEl.click();
 
-      // wait for the guest to be added to the list before continuing
+      // wait for cibus http request to finish and payment button to be enabled
       await waitForValue(() =>
-        selectors.friendPaymentTableRow(guest.cibusName)
+        !selectors.paymentButton().disabled
       );
-
-      // there's some cibus requests done after adding a friend, so we wait a bit
-      // TODO - wait but payment button to be enabled instead of fixed time
-      await new Promise((res) => setTimeout(res, 500));
     }
 
     return { availableGuests, missingGuests };
@@ -381,12 +382,10 @@
 
   setContent(getLoaderUi());
 
-  await new Promise((res) => setTimeout(res, 200));
-
   selectors.splitPaymentWithFriendsToggle().click();
 
-  // wait a bit for the friends list to load
-  await new Promise((res) => setTimeout(res, 200));
+  // it takes a bit for cibus to update the page after toggle
+  await waitForValue(() => selectors.myCharge());
 
   const cibusMapping = await groupManager.getAllGuests();
   const allCibusFriends = getAllCibusNames();
