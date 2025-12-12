@@ -3,8 +3,6 @@
     while (document.querySelector("app-order-split") === null) {
       await new Promise((res) => setTimeout(res, 100));
     }
-
-    await new Promise((res) => setTimeout(res, 100));
   }
 
   await waitForApp();
@@ -398,6 +396,9 @@
   const allCibusFriends = getAllCibusNames();
   const guestDebs = await fetchGuestsDebts();
   const { matchedGuests, missingGuests } = await matchGuestsToCibus(guestDebs, cibusMapping, allCibusFriends);
+
+  selectors.splitPaymentWithFriendsToggle().click();
+  await waitForValue(() => selectors.myCharge());
 
   setContent(getUi({
     selectGuestsFn: () => selectGuestsFromMenu(matchedGuests, allCibusFriends, missingGuests),
