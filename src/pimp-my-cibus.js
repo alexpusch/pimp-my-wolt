@@ -174,31 +174,32 @@
     <style>
       .container-pimpMyWolt {
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        border: 1px solid #ccc;
+        flex-direction: row;
+        border: 1px solid #ddd;
         border-radius: 5px;
         position: relative;
-        padding: 5px;
-        margin: 5px;
+        padding: 0 5px;
+        margin: 0;
+        justify-content: center;
+        align-items: center;
       }
 
       .logo-pimpMyWolt {  
-        position: absolute;
-        top: -10px;
-        left: 0px;
-        height: 64px;
+        height: 70px;
+        margin: -30px 10px;
+        position: relative;
+        top: -2px;
       }
 
       .loader-pimpMyWolt {
-        height: 32px;
+        height: 24px;
         margin: 15px;
       }
     </style>
 
     <div class="container-pimpMyWolt">
-      <img src="${logoUrl}" class="logo-pimpMyWolt"/>
       <img src="${loaderUrl}" class="loader-pimpMyWolt"/>
+      <img src="${logoUrl}" class="logo-pimpMyWolt"/>
     </div>
     `;
 
@@ -216,18 +217,19 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        border: 1px solid #ccc;
+        border: 1px solid #ddd;
         border-radius: 5px;
         position: relative;
-        padding: 5px;
-        margin: 5px;
+        padding: 0 5px;
+        margin: 0;
       }
 
       .logo-pimpMyWolt {  
-        position: absolute;
-        top: -10px;
-        left: 0px;
-        height: 64px;
+        height: 60px;
+        display: block;
+        margin: -30px 0;
+        position: relative;
+        top: -4px;
       }
       
       .buttons-pimpMyWolt {
@@ -244,16 +246,21 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        font-size: 18px;
+        font-size: 16px;
         margin: 0 5px;
-        padding: 8px 15px;
+        padding: 8px 10px;
+      }
+
+      .btn-pimpMyWolt:hover {
+        background: #f8f8f8;
+        cursor: pointer;
       }
     </style>
     <div class="container-pimpMyWolt">
-      <img src="${logoUrl}" class="logo-pimpMyWolt"/>
       <div class="buttons-pimpMyWolt">
         <button id="selectGuestsButton-pimpMyWolt" class="btn-pimpMyWolt">הוסף חברים 👨🏾‍🤝‍👨🏼 </button>
         <button id="splitPayButton-pimpMyWolt" class="btn-pimpMyWolt">הכנס סכומים 💰</button>
+        <img src="${logoUrl}" class="logo-pimpMyWolt"/>
       </div>
       <div id="status-pimpMyWolt"></div>
     </div>
@@ -276,7 +283,7 @@
       `;
       } else {
         splitPayFn();
-        statusMessage = "<span class='sucess-pimpMyWolt'>הופה! הצלחנו לפצל את כל החברים בקבוצה</span>";
+        statusMessage = "<span class='sucess-pimpMyWolt'>הופה! הצלחנו לפצל את כל החברים בקבוצה 🎉</span>";
       }
 
       container.querySelector(`#status-pimpMyWolt`).innerHTML = statusMessage;
