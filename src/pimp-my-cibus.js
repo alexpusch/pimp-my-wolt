@@ -387,8 +387,6 @@
 
   setContent(getLoaderUi());
 
-  selectors.splitPaymentWithFriendsToggle().click();
-
   // it takes a bit for cibus to update the page after toggle
   await waitForValue(() => selectors.myCharge());
 
