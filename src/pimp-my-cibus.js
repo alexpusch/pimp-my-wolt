@@ -387,16 +387,16 @@
 
   setContent(getLoaderUi());
 
-  // it takes a bit for cibus to update the page after toggle
+  // If we toggle too fast the ui breaks
+  await new Promise((res) => setTimeout(res, 200));
+
+  selectors.splitPaymentWithFriendsToggle().click();
   await waitForValue(() => selectors.myCharge());
 
   const cibusMapping = await groupManager.getAllGuests();
   const allCibusFriends = getAllCibusNames();
   const guestDebs = await fetchGuestsDebts();
   const { matchedGuests, missingGuests } = await matchGuestsToCibus(guestDebs, cibusMapping, allCibusFriends);
-
-  selectors.splitPaymentWithFriendsToggle().click();
-  await waitForValue(() => selectors.myCharge());
 
   setContent(getUi({
     selectGuestsFn: () => selectGuestsFromMenu(matchedGuests, allCibusFriends, missingGuests),
