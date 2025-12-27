@@ -340,6 +340,14 @@
 
       pickGuestEl.click();
 
+      await waitForValue(() =>
+        !!selectors.friendPaymentTableRow(guest.cibusName)
+      );
+
+      const addedFrientEl = selectors.friendPaymentTableRow(guest.cibusName);
+      const woltNameHint = `<span style="font-size: 10px; color: #009de0"> (${guest.cibusName})</span>`;
+      addedFrientEl.innerHTML += woltNameHint;
+
       // wait for cibus http request to finish and payment button to be enabled
       await waitForValue(() =>
         !selectors.paymentButton().disabled
