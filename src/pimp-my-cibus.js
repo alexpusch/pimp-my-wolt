@@ -22,7 +22,6 @@
     paymentButton: getCurrentLanguage("Order with Cibus", "אישור התשלום באמצעות סיבוס"),
     addFriendToShareButton: getCurrentLanguage("Add friends to sharing", "הוספת חברים לחלוקה"),
     chooseFriendButton: getCurrentLanguage("Choose friend", " בחירת חבר/ה "),
-    currentUserRegEx: getCurrentLanguage(/Hi, (.+)/, /היי, (.+)/),
     myChargeText: getCurrentLanguage("My charge", "החיוב שלי"),
   };
 
@@ -30,7 +29,7 @@
     paymentButton() { return getElementWithText("button", texts.paymentButton) },
     splitPaymentWithFriendsToggle() { return document.querySelector("app-toggle-button .ng-toggle-switch-button") },
     addFriendsToShareButton() { return getElementWithText("a", texts.addFriendToShareButton) },
-    chooseFriendButton() { return getElementWithText("span", texts.chooseFriendButton) },
+    chooseFriendButton() { return document.querySelector(".mat-menu-trigger:not(.hid)") },
     chooseFriendDeleteButton() {
       return this.chooseFriendButton().closest("tr").querySelector(".del")
     },
@@ -39,11 +38,6 @@
     friendPaymentInput(name) {
       const guestEl = this.friendPaymentTableRow(name);
       return guestEl?.closest("tr")?.querySelector("input");
-    },
-    currentUserName() {
-      const currentUserEl = document.querySelector("app-oauth-pay b")
-      const match = texts.currentUserRegEx.exec(currentUserEl.innerText);
-      return match?.[1];
     },
     allFriendsInMenu() {
       return [...document.querySelectorAll(".friends-menu-item")].map((e) => e?.innerText);
@@ -89,7 +83,9 @@
     });
 
 
-  async function matchGuestsToCibus(guestsOrders, cibusMapping, allCibusFriends) {
+  async function matchGuestsToCibus(allOrders, cibusMapping, allCibusFriends) {
+    const [currentUser, ...guestsOrders] = allOrders;
+
     const matchedByMapping = guestsOrders
       .filter(guestOrder => cibusMapping.find(cibusGuest => cibusGuest.woltName === guestOrder.name))
       .map(guestOrder => {
@@ -118,15 +114,16 @@
       }
     })
 
-    const currentUser = selectors.currentUserName();
+
+
+
     const matchedGuests = [...matchedByMapping, ...autoMatched];
     const missingGuests = guestsOrders.filter(guestOrder => {
       const match = matchedGuests.find(match => match.woltName === guestOrder.name);
-      return !match || (match.cibusName !== currentUser && !allCibusFriends.find(cibusGuest => cibusGuest === match.cibusName));
+      return !match || (!allCibusFriends.find(cibusGuest => cibusGuest === match.cibusName));
     });
 
-    const matchedGuestsWithoutCurrentUser = matchedGuests.filter(match => match.cibusName !== currentUser);
-    return { matchedGuests: matchedGuestsWithoutCurrentUser, missingGuests };
+    return { matchedGuests, missingGuests };
   }
 
   async function fetchGuestsDebts() {
