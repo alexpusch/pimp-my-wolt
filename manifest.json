@@ -13,9 +13,9 @@
   "content_scripts": [
     {
       "css": [
-        "/src/styles.css",
-        "/src/ext/micromodal.css",
-        "/src/wheel/wheelstyle.css"
+                "/src/ext/micromodal.css",
+        "/src/wheel/wheelstyle.css",
+        "/src/styles.css"
       ],
       "js": [
         "/src/ext/micromodal.min.js",

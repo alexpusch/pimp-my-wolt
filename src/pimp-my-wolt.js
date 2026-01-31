@@ -7,18 +7,18 @@
   const { MicroModal } = window;
 
   const isHebrewWolt = window.location.href.toLowerCase().includes("com/he/");
-  
+
   const getCurrentLangugue = (english, hebrew) => isHebrewWolt ? hebrew : english
-  
+
   const texts = {
-    suggestedGuestsText: getCurrentLangugue("Suggested people" , "אנשים שאולי ירצו להזמין איתך"),
+    suggestedGuestsText: getCurrentLangugue("Suggested people", "אנשים שאולי ירצו להזמין איתך"),
     readyText: getCurrentLangugue("Ready", "מוכנ/ה"),
     inviteAllInGroup: (groupName) => getCurrentLangugue(`Invite ${groupName}`, `הזמן את ${groupName}`),
-    addGroup: getCurrentLangugue("Add Group" , "הוסף קבוצה"),
+    addGroup: getCurrentLangugue("Add Group", "הוסף קבוצה"),
     wheelButtonTooltip: getCurrentLangugue("Don't know what to order yet?", "לא יודעים מה להזמין עדיין?"),
     orderSubtotalPrice: getCurrentLangugue("subtotal", "סכום ההזמנה"),
     orderDeliveryPrice: getCurrentLangugue("Delivery", "משלוח"),
-    orderSmallFeePrice: getCurrentLangugue("Small order fee", "תוספת מחיר להזמנה קטנה מדי" ),
+    orderSmallFeePrice: getCurrentLangugue("Small order fee", "תוספת מחיר להזמנה קטנה מדי"),
     orderTipPrice: getCurrentLangugue("tip", "טיפ לשליח"),
     orderServiceFeePrice: getCurrentLangugue("Service fee", "דמי תפעול")
   }
@@ -282,17 +282,19 @@
     <div class="modal__overlay" tabindex="-1" data-micromodal-close>
       <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="modal-member-setup-title">
         <header class="modal__header modal-header-pimpMyWolt">
-        <img src="${logoUrl}"/>
+        <div class="modal__title-container">
+          <img src="${logoUrl}"/>
           <h2 class="modal__title" id="modal-member-setup-title">
             Set Group Member Name
           </h2>
+        </div>
         </header>
         <main id="modal-member-setup-content">
-        <p>
-        Please type <b><span id="add-member-name-pimpMyWolt"/></b> name on cibus.<br/>
-        Cibus name may be found <a href="https://consumers.pluxee.co.il/user/friends" target="_blank">here</a>.
-        </p>
-          <p>
+          <p class="modal__text">
+          Please type <b><span id="add-member-name-pimpMyWolt"/></b> name on cibus.<br/>
+          Cibus name may be found <a href="https://consumers.pluxee.co.il/user/friends" target="_blank">here</a>.
+          </p>
+          <p class="modal__input-container">
             <input id="pimp_my_wolt__cibus_name" class="pimp_my_wolt__input"/>
           </p>
         </main>
@@ -311,7 +313,7 @@
         const teamName = await groupManager.getTeamName();
         await fetch(
           "https://amitmarx.wixsite.com/pimp-my-wolt/_functions/group_member/" +
-            teamName,
+          teamName,
           {
             method: "POST",
             headers: {
@@ -359,7 +361,7 @@
       const onclick = async () => {
         await fetch(
           "https://amitmarx.wixsite.com/pimp-my-wolt/_functions/group_member/" +
-            memberWoltId,
+          memberWoltId,
           {
             method: "DELETE",
           }
