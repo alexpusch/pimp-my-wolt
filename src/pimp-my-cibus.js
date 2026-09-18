@@ -1,3 +1,5 @@
+import { matchUnresolvedNames } from "./openrouter-matcher.js";
+
 (async function () {
   async function waitForApp() {
     while (document.querySelector("app-order-split") === null) {
@@ -62,19 +64,17 @@
   }
 
   async function getAutoMatch({ woltNames, cibusNames }) {
-    const response = await fetch(
-      `https://amitmarx.wixsite.com/pimp-my-wolt/_functions/cibus_wolt_auto_matches`,
-      {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-        body: JSON.stringify({ woltNames, cibusNames }),
-      }
-    );
-    const responseJson = await response.json();
-    return responseJson;
+    const { openRouterApiKey, openRouterModel } = await new Promise((resolve) => {
+      chrome.storage.local.get(["openRouterApiKey", "openRouterModel"], resolve);
+    });
+    if (!openRouterApiKey || !openRouterModel) return [];
+
+    return matchUnresolvedNames({
+      woltNames,
+      cibusNames,
+      apiKey: openRouterApiKey,
+      model: openRouterModel,
+    });
   }
 
   const fetchFromStorage = (...items) =>

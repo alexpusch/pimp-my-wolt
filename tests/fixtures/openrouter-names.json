@@ -1,0 +1,28 @@
+{
+    "woltNames": [
+        "Dana Cohen",
+        "יואב לוי",
+        "Maya Ben David",
+        "No Match"
+    ],
+    "cibusNames": [
+        "Dana C.",
+        "Levi Yoav",
+        "Maya Ben-David",
+        "Noah Match"
+    ],
+    "expectedMatches": [
+        {
+            "woltName": "Dana Cohen",
+            "cibusName": "Dana C."
+        },
+        {
+            "woltName": "יואב לוי",
+            "cibusName": "Levi Yoav"
+        },
+        {
+            "woltName": "Maya Ben David",
+            "cibusName": "Maya Ben-David"
+        }
+    ]
+}

@@ -1,11 +1,26 @@
 <!DOCTYPE html>
 <html>
-<head><title>Pimp my Wolt</title></head>
+
+<head>
+  <title>Pimp my Wolt</title>
+</head>
+
 <body>
-  
-  <span>Group Name:</span>
-  <input id="team"></input>
-  
+
+  <label for="team">Group Name:</label>
+  <input id="team">
+
+  <hr>
+  <h2>Automatic name matching</h2>
+  <label for="openrouter-api-key">OpenRouter API key:</label>
+  <input id="openrouter-api-key" type="password" autocomplete="off">
+  <label for="openrouter-model">OpenRouter model identifier:</label>
+  <input id="openrouter-model" autocomplete="off" placeholder="provider/model">
+  <button id="save-ai-settings" type="button">Save AI settings</button>
+  <button id="clear-ai-settings" type="button">Clear AI settings</button>
+  <p id="ai-settings-status" role="status"></p>
+
   <script src="set-team-page.js"></script>
-  </body>
+</body>
+
 </html>

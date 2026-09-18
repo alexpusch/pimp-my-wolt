@@ -6,6 +6,9 @@
   "permissions": [
     "storage"
   ],
+  "host_permissions": [
+    "https://openrouter.ai/*"
+  ],
   "options_ui": {
     "page": "/src/set-team-page.html",
     "open_in_tab": false

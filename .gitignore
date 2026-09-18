@@ -1,3 +1,7 @@
 .idea*
 .vscode*
 PR/*.mp4
+dist/
+node_modules/
+pimp-my-wolt.zip
+.scratch
