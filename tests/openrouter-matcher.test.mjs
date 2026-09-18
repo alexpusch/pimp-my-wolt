@@ -1,7 +1,34 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
+import { addMatchesToCache, getCachedMatches } from "../src/cibus-match-cache.js";
 import { applyMatchesToDebts, DEFAULT_OPENROUTER_MODEL, matchUnresolvedNames, resolveOpenRouterModel, validateMatches } from "../src/openrouter-matcher.js";
+
+test("reuses only cached matches that remain valid and one-to-one", () => {
+    const cachedMatches = getCachedMatches(
+        ["Dana Cohen", "Yoav Levi", "New Guest"],
+        ["Dana C.", "Yoav L."],
+        {
+            "Dana Cohen": "Dana C.",
+            "Yoav Levi": "Dana C.",
+            "Former Guest": "Missing Cibus User",
+        }
+    );
+
+    assert.deepEqual(cachedMatches, [{ woltName: "Dana Cohen", cibusName: "Dana C." }]);
+});
+
+test("adds newly resolved matches without discarding existing cache entries", () => {
+    const cache = addMatchesToCache(
+        { "Dana Cohen": "Dana C." },
+        [{ woltName: "Yoav Levi", cibusName: "Yoav L." }]
+    );
+
+    assert.deepEqual(cache, {
+        "Dana Cohen": "Dana C.",
+        "Yoav Levi": "Yoav L.",
+    });
+});
 
 test("keeps only one-to-one matches from known Wolt and Cibus names", () => {
     const matches = validateMatches(

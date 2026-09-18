@@ -1,3 +1,4 @@
+import { CIBUS_MATCH_CACHE_KEY, addMatchesToCache, getCachedMatches } from "./cibus-match-cache.js";
 import { DEFAULT_OPENROUTER_MODEL, matchUnresolvedNames } from "./openrouter-matcher.js";
 
 (async function () {
@@ -86,7 +87,32 @@ import { DEFAULT_OPENROUTER_MODEL, matchUnresolvedNames } from "./openrouter-mat
   async function matchGuestsToCibus(allOrders, allCibusFriends) {
     const [currentUser, ...guestsOrders] = allOrders;
     const woltNames = guestsOrders.map(guestOrder => guestOrder.name);
-    const autoMatching = await getAutoMatch({ woltNames, cibusNames: allCibusFriends });
+    const { [CIBUS_MATCH_CACHE_KEY]: matchCache = {} } = await fetchFromStorage(CIBUS_MATCH_CACHE_KEY);
+    const cachedMatches = getCachedMatches(woltNames, allCibusFriends, matchCache);
+    const cachedWoltNames = new Set(cachedMatches.map(({ woltName }) => woltName));
+
+    if (cachedWoltNames.size > 0) {
+      console.log("Cached Wolt Names:", cachedWoltNames);
+    }
+
+    const unresolvedWoltNames = woltNames.filter((woltName) => !cachedWoltNames.has(woltName));
+
+    if (unresolvedWoltNames.length === 0) {
+      console.log("All Wolt names are resolved from cache.");
+    } else {
+      console.log("Unresolved Wolt Names:", unresolvedWoltNames);
+    }
+
+    const newMatches = unresolvedWoltNames.length > 0
+      ? await getAutoMatch({ woltNames: unresolvedWoltNames, cibusNames: allCibusFriends })
+      : [];
+    const autoMatching = [...cachedMatches, ...newMatches];
+
+    if (newMatches.length > 0) {
+      chrome.storage.local.set({
+        [CIBUS_MATCH_CACHE_KEY]: addMatchesToCache(matchCache, newMatches),
+      });
+    }
 
     const matchedGuests = autoMatching.filter(matching => !!matching.cibusName).map(matching => {
       const debt = guestsOrders.find(guestOrder => guestOrder.name === matching.woltName).price;

@@ -36,22 +36,22 @@ function init() {
     //
     ctx.restore()
   }
-  
+
   function rotate() {
     const sector = sectors[getIndex()]
     ctx.canvas.style.transform = `rotate(${ang - PI / 2}rad)`
-    spinEl.textContent = !angVel ? lastLabel !== ''? lastLabel : 'SPIN' : sector.label;
-  
+    spinEl.textContent = !angVel ? lastLabel !== '' ? lastLabel : 'SPIN' : sector.label;
+
     if (!angVel && lastLabel !== '') {
-        setTimeout(() => {
-          spinEl.textContent = 'SPIN';
-        }, 2000);
-      }
-  
+      setTimeout(() => {
+        spinEl.textContent = 'SPIN';
+      }, 2000);
+    }
+
     spinEl.style.background = sector.color;
     lastLabel = sector.label;
   }
-  
+
   function frame() {
     if (!angVel) return
     angVel *= friction // Decrement velocity by friction
@@ -59,19 +59,19 @@ function init() {
     ang += angVel // Update angle
     ang %= TAU // Normalize angle
     rotate()
-  
+
     if (angVel === 0) {
-        // The spin has stopped, you can access the last displayed label here
-        var spinDiv = document.getElementById("spin-pimpMyWolt");
-        spinDiv.textContent = lastLabel;
-        spinDiv.setAttribute('data-last-label', lastLabel);
-        
-        var orderBtn = document.getElementById("order-btn-pimpMyWolt");
-        orderBtn.classList.remove("disabled-pimpMyWolt");
+      // The spin has stopped, you can access the last displayed label here
+      var spinDiv = document.getElementById("spin-pimpMyWolt");
+      spinDiv.textContent = lastLabel;
+      spinDiv.setAttribute('data-last-label', lastLabel);
+
+      var orderBtn = document.getElementById("order-btn-pimpMyWolt");
+      orderBtn.classList.remove("disabled-pimpMyWolt");
 
     }
   }
-  
+
   function engine() {
     frame()
     requestAnimationFrame(engine)
