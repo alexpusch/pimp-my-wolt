@@ -45,6 +45,12 @@
       color: var(--text);
     }
 
+    #saved-openrouter-api-key {
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: #d9f1ff;
+    }
+
     input {
       width: 100%;
       margin: 0 0 16px;
@@ -204,8 +210,8 @@
 <body>
   <div class="settings-panel">
     <h2>Automatic name matching</h2>
-    <label for="openrouter-api-key">OpenRouter API key:</label>
-    <input id="openrouter-api-key" type="password" autocomplete="off">
+    <label for="openrouter-api-key">OpenRouter API key: <span id="saved-openrouter-api-key"></span></label>
+    <input id="openrouter-api-key" type="password" autocomplete="off" placeholder="New API key">
     <label for="openrouter-model">OpenRouter model identifier:</label>
     <input id="openrouter-model" autocomplete="off" placeholder="provider/model">
 

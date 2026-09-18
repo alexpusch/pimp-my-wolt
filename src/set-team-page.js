@@ -3,28 +3,42 @@ import { CIBUS_MATCH_CACHE_KEY } from "./cibus-match-cache.js";
 const DEFAULT_OPENROUTER_MODEL = "openai/gpt-5.6-luna";
 
 const apiKeyInput = document.getElementById("openrouter-api-key");
+const savedApiKeyElement = document.getElementById("saved-openrouter-api-key");
 const modelInput = document.getElementById("openrouter-model");
 const status = document.getElementById("ai-settings-status");
 const cacheStatus = document.getElementById("cache-status");
 const cachedMatchesContainer = document.getElementById("cached-name-matches");
+let savedApiKey = "";
+
+function maskApiKey(apiKey) {
+  const visiblePrefixLength = 13;
+  const visibleSuffixLength = 3;
+  if (apiKey.length <= visiblePrefixLength + visibleSuffixLength) {
+    return apiKey;
+  }
+  return apiKey.slice(0, visiblePrefixLength) + "..." + apiKey.slice(-visibleSuffixLength);
+}
 
 chrome.storage.local.get(["openRouterApiKey", "openRouterModel"], (settings) => {
   modelInput.value = settings.openRouterModel || DEFAULT_OPENROUTER_MODEL;
   if (settings.openRouterApiKey) {
-    apiKeyInput.placeholder = "Saved API key";
+    savedApiKey = settings.openRouterApiKey;
+    savedApiKeyElement.textContent = maskApiKey(savedApiKey);
   }
 });
 
 document.getElementById("save-ai-settings").addEventListener("click", () => {
-  const apiKey = apiKeyInput.value.trim();
+  const enteredApiKey = apiKeyInput.value.trim();
+  const apiKey = enteredApiKey || savedApiKey;
   const model = modelInput.value.trim() || DEFAULT_OPENROUTER_MODEL;
   if (!apiKey) {
     status.textContent = "Enter an API key.";
     return;
   }
   chrome.storage.local.set({ openRouterApiKey: apiKey, openRouterModel: model }, () => {
+    savedApiKey = apiKey;
+    savedApiKeyElement.textContent = maskApiKey(savedApiKey);
     apiKeyInput.value = "";
-    apiKeyInput.placeholder = "Saved API key";
     status.textContent = "AI settings saved.";
   });
 });
