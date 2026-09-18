@@ -1,22 +1,6 @@
-#invite-group-button-pimpMyWolt {
-    font-size: 14px;
-    color: #009de0;
-    text-align: right;
-    cursor: pointer;
-}
-
 .pimp_my_wolt__input {
     border: 1px solid #ccc;
     border-radius: 6px;
-}
-
-.participant-pimpMyWolt {
-    display: flex;
-    align-items: center;
-}
-
-.participant-pimpMyWolt a {
-    margin: 0;
 }
 
 .modal-pimpMyWolt {
@@ -77,29 +61,6 @@
     height: 100px;
 }
 
-.action-button-pimpMyWolt {
-    cursor: pointer;
-    border-radius: 50%;
-    margin-right: 0.5rem;
-    -webkit-margin-start: 0;
-    margin-inline-start: 0;
-    -webkit-margin-end: 0.5rem;
-    margin-inline-end: 0.5rem;
-    background-color: #f6f6f6;
-    border: 1px solid #f6f6f6;
-    transition: border 0.1s linear;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
-}
-
-.action-button-pimpMyWolt:hover {
-    border: 1px solid black;
-}
-
 .little-letters-pimpMyWolt {
     font-size: small;
     color: gray;
@@ -135,10 +96,6 @@
 
 
 /* Dark Mode Overrides */
-html[data-al-theme="dark"] #invite-group-button-pimpMyWolt {
-    color: #4db5e6;
-}
-
 html[data-al-theme="dark"] .pimp_my_wolt__input {
     border-color: #555;
     background-color: #333;
@@ -153,16 +110,6 @@ html[data-al-theme="dark"] #autoPaymentButton-pimpMyWolt {
 
 html[data-al-theme="dark"] #autoPaymentButton-pimpMyWolt:hover {
     background-color: rgba(0, 157, 224, 0.15);
-}
-
-html[data-al-theme="dark"] .action-button-pimpMyWolt {
-    background-color: #333;
-    border-color: #333;
-    color: #fff;
-}
-
-html[data-al-theme="dark"] .action-button-pimpMyWolt:hover {
-    border-color: #eee;
 }
 
 html[data-al-theme="dark"] .little-letters-pimpMyWolt {

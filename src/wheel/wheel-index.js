@@ -1,4 +1,5 @@
-const { biLogger } = window.pimpMyWolt;
+window.pimpMyWolt ||= {};
+
 const sectors = [
   { color: '#f82', label: 'Mexican' },
   { color: '#0bf', label: 'Indian' },
@@ -14,10 +15,6 @@ const sectors = [
 
 function init() {
   const getIndex = () => Math.floor(tot - (ang / TAU) * tot) % tot
-
-  async function publishSpinCategory({category}) {
-    biLogger.logEvent("wheel_of_luck_spin", {category});
-  }
 
   function drawSector(sector, i) {
     const ang = arc * i
@@ -72,7 +69,6 @@ function init() {
         var orderBtn = document.getElementById("order-btn-pimpMyWolt");
         orderBtn.classList.remove("disabled-pimpMyWolt");
 
-        publishSpinCategory({category: lastLabel})
     }
   }
   

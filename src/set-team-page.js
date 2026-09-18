@@ -1,16 +1,5 @@
 const DEFAULT_OPENROUTER_MODEL = "openai/gpt-5.6-luna";
 
-const input = document.getElementById("team");
-
-input.addEventListener("change", () => {
-  const teamName = input.value;
-  chrome.storage.sync.set({ teamName });
-});
-
-chrome.storage.sync.get("teamName", ({ teamName }) => {
-  input.value = teamName || "";
-});
-
 const apiKeyInput = document.getElementById("openrouter-api-key");
 const modelInput = document.getElementById("openrouter-model");
 const status = document.getElementById("ai-settings-status");

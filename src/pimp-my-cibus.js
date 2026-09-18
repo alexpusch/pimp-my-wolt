@@ -83,28 +83,12 @@ import { DEFAULT_OPENROUTER_MODEL, matchUnresolvedNames } from "./openrouter-mat
     });
 
 
-  async function matchGuestsToCibus(allOrders, cibusMapping, allCibusFriends) {
+  async function matchGuestsToCibus(allOrders, allCibusFriends) {
     const [currentUser, ...guestsOrders] = allOrders;
+    const woltNames = guestsOrders.map(guestOrder => guestOrder.name);
+    const autoMatching = await getAutoMatch({ woltNames, cibusNames: allCibusFriends });
 
-    const matchedByMapping = guestsOrders
-      .filter(guestOrder => cibusMapping.find(cibusGuest => cibusGuest.woltName === guestOrder.name))
-      .map(guestOrder => {
-        const cibusName = cibusMapping.find(cibusGuest => cibusGuest.woltName === guestOrder.name).cibusName;
-        return {
-          woltName: guestOrder.name,
-          debt: guestOrder.price,
-          cibusName
-        }
-      });
-
-    const nonMatchedWoltNames = guestsOrders
-      .filter(guestOrder => !cibusMapping.find(cibusGuest => cibusGuest.woltName === guestOrder.name))
-      .map(guestOrder => guestOrder.name);
-
-    const remainingCibusNames = allCibusFriends.filter(cibusName => !matchedByMapping.find(cibusGuest => cibusGuest.cibusName === cibusName));
-    const autoMatcheing = await getAutoMatch({ woltNames: nonMatchedWoltNames, cibusNames: remainingCibusNames });
-
-    const autoMatched = autoMatcheing.filter(matching => !!matching.cibusName).map(matching => {
+    const matchedGuests = autoMatching.filter(matching => !!matching.cibusName).map(matching => {
       const debt = guestsOrders.find(guestOrder => guestOrder.name === matching.woltName).price;
 
       return {
@@ -117,7 +101,6 @@ import { DEFAULT_OPENROUTER_MODEL, matchUnresolvedNames } from "./openrouter-mat
 
 
 
-    const matchedGuests = [...matchedByMapping, ...autoMatched];
     const missingGuests = guestsOrders.filter(guestOrder => {
       const match = matchedGuests.find(match => match.woltName === guestOrder.name);
       return !match || (!allCibusFriends.find(cibusGuest => cibusGuest === match.cibusName));
@@ -398,10 +381,9 @@ import { DEFAULT_OPENROUTER_MODEL, matchUnresolvedNames } from "./openrouter-mat
   selectors.splitPaymentWithFriendsToggle().click();
   await waitForValue(() => selectors.myCharge());
 
-  const cibusMapping = await groupManager.getAllGuests();
   const allCibusFriends = getAllCibusNames();
   const guestDebs = await fetchGuestsDebts();
-  const { matchedGuests, missingGuests } = await matchGuestsToCibus(guestDebs, cibusMapping, allCibusFriends);
+  const { matchedGuests, missingGuests } = await matchGuestsToCibus(guestDebs, allCibusFriends);
 
   setContent(getUi({
     selectGuestsFn: () => selectGuestsFromMenu(matchedGuests, allCibusFriends, missingGuests),

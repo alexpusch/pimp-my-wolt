@@ -22,8 +22,6 @@
       ],
       "js": [
         "/src/ext/micromodal.min.js",
-        "/src/group-manager.js",
-        "/src/bi-logger.js",
         "/src/wheel/wheel-index.js",
         "/src/pimp-my-wolt.js"
       ],
@@ -36,8 +34,6 @@
         "/src/styles.css"
       ],
       "js": [
-        "/src/group-manager.js",
-        "/src/bi-logger.js",
         "/src/pimp-my-cibus.js"
       ],
       "matches": [
