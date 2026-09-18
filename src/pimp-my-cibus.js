@@ -1,4 +1,4 @@
-import { matchUnresolvedNames } from "./openrouter-matcher.js";
+import { DEFAULT_OPENROUTER_MODEL, matchUnresolvedNames } from "./openrouter-matcher.js";
 
 (async function () {
   async function waitForApp() {
@@ -67,13 +67,13 @@ import { matchUnresolvedNames } from "./openrouter-matcher.js";
     const { openRouterApiKey, openRouterModel } = await new Promise((resolve) => {
       chrome.storage.local.get(["openRouterApiKey", "openRouterModel"], resolve);
     });
-    if (!openRouterApiKey || !openRouterModel) return [];
+    if (!openRouterApiKey) return [];
 
     return matchUnresolvedNames({
       woltNames,
       cibusNames,
       apiKey: openRouterApiKey,
-      model: openRouterModel,
+      model: openRouterModel || DEFAULT_OPENROUTER_MODEL,
     });
   }
 

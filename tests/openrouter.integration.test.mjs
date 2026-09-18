@@ -13,7 +13,7 @@ test("OpenRouter conservatively matches the synthetic bilingual fixture", { time
         woltNames: fixture.woltNames,
         cibusNames: fixture.cibusNames,
         apiKey: process.env.OPENROUTER_API_KEY,
-        model: 'meta/muse-spark-1.1',
+        model: 'openai/gpt-5.6-luna',
     });
 
     assert.deepEqual(matches, fixture.expectedMatches);

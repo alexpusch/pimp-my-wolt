@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { applyMatchesToDebts, matchUnresolvedNames, validateMatches } from "../src/openrouter-matcher.js";
+import { applyMatchesToDebts, DEFAULT_OPENROUTER_MODEL, matchUnresolvedNames, resolveOpenRouterModel, validateMatches } from "../src/openrouter-matcher.js";
 
 test("keeps only one-to-one matches from known Wolt and Cibus names", () => {
     const matches = validateMatches(
@@ -19,6 +19,12 @@ test("keeps only one-to-one matches from known Wolt and Cibus names", () => {
         { woltName: "יואב לוי", cibusName: "Yoav Levi" },
         { woltName: "Maya Ben David", cibusName: "Maya B. David" },
     ]);
+});
+
+test("uses the Luna model as the default OpenRouter model", () => {
+    assert.equal(DEFAULT_OPENROUTER_MODEL, "openai/gpt-5.6-luna");
+    assert.equal(resolveOpenRouterModel(""), DEFAULT_OPENROUTER_MODEL);
+    assert.equal(resolveOpenRouterModel("  provider/custom "), "provider/custom");
 });
 
 test("accepts model results for transliteration, reordered names, surname initials, and spelling variants", () => {

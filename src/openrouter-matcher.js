@@ -1,6 +1,12 @@
 import { OpenRouter } from "@openrouter/sdk";
 
 const MAX_NAMES = 50;
+export const DEFAULT_OPENROUTER_MODEL = "openai/gpt-5.6-luna";
+
+export function resolveOpenRouterModel(model) {
+    const normalizedModel = typeof model === "string" ? model.trim() : "";
+    return normalizedModel || DEFAULT_OPENROUTER_MODEL;
+}
 
 let activeRequest;
 
@@ -58,7 +64,8 @@ function parseMatches(response) {
 
 export async function matchUnresolvedNames({ woltNames, cibusNames, apiKey, model, send, timeoutMs = 30_000 }) {
     if (activeRequest) throw new Error("MATCH_IN_PROGRESS");
-    if (!apiKey || !model) throw new Error("MISSING_SETTINGS");
+    const resolvedModel = resolveOpenRouterModel(model);
+    if (!apiKey || !resolvedModel) throw new Error("MISSING_SETTINGS");
     if (!Array.isArray(woltNames) || !Array.isArray(cibusNames) || woltNames.length > MAX_NAMES || cibusNames.length > MAX_NAMES) {
         throw new Error("NAME_LIMIT_EXCEEDED");
     }
@@ -71,7 +78,7 @@ export async function matchUnresolvedNames({ woltNames, cibusNames, apiKey, mode
             retries: { strategy: "none" },
         })))({
             chatRequest: {
-                model,
+                model: resolvedModel,
                 stream: false,
                 temperature: 0,
                 messages: [{ role: "user", content: createMatchingPrompt(woltNames, cibusNames) }],
