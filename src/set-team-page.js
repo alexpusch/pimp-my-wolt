@@ -33,13 +33,3 @@ document.getElementById("save-ai-settings").addEventListener("click", () => {
     status.textContent = "AI settings saved.";
   });
 });
-
-document.getElementById("clear-ai-settings").addEventListener("click", () => {
-  if (!window.confirm("Clear the saved OpenRouter API key and model?")) return;
-  chrome.storage.local.remove(["openRouterApiKey", "openRouterModel"], () => {
-    apiKeyInput.value = "";
-    apiKeyInput.placeholder = "";
-    modelInput.value = "";
-    status.textContent = "AI settings cleared.";
-  });
-});
