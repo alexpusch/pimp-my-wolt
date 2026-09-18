@@ -108,6 +108,96 @@
       color: var(--success);
       font-size: 0.95rem;
     }
+
+    .cache-entry {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cache-header {
+      padding: 0 0 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .cache-entry-name {
+      overflow-wrap: anywhere;
+    }
+
+    .cache-arrow {
+      color: var(--muted);
+    }
+
+    .delete-cache-entry {
+      display: flex;
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      min-height: 24px;
+      padding: 0;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background: #8f1d1d;
+      border: none;
+      border-radius: 50%;
+    }
+
+    .delete-cache-entry::before {
+      content: "×";
+      font-family: Arial, sans-serif;
+      font-size: 17px;
+      font-weight: 400;
+      line-height: 1;
+      transform: translateY(1px);
+    }
+
+    .delete-cache-entry:hover {
+      background: #6f1616;
+    }
+
+    .cache-add-entry input {
+      min-width: 0;
+      margin: 0;
+      padding: 8px 10px;
+    }
+
+    .add-cache-entry {
+      display: flex;
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      min-height: 24px;
+      padding: 0;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background: #1f9d55;
+      border: none;
+      border-radius: 50%;
+    }
+
+    .add-cache-entry::before {
+      content: "+";
+      font-family: Arial, sans-serif;
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 1;
+    }
+
+    .add-cache-entry:hover {
+      background: #16813f;
+    }
+
+    .empty-cache {
+      margin: 0;
+      color: var(--muted);
+    }
   </style>
 </head>
 
@@ -124,9 +214,22 @@
     </div>
 
     <p id="ai-settings-status" role="status"></p>
+
+    <hr>
+
+    <h2>Saved name matches</h2>
+    <div id="cached-name-matches" aria-live="polite">
+      <div class="cache-entry cache-header" aria-hidden="true">
+        <span>Wolt name</span>
+        <span></span>
+        <span>Cibus name</span>
+        <span></span>
+      </div>
+    </div>
+    <p id="cache-status" role="status"></p>
   </div>
 
-  <script src="set-team-page.js"></script>
+  <script type="module" src="set-team-page.js"></script>
 </body>
 
 </html>
