@@ -259,8 +259,27 @@ import { DEFAULT_OPENROUTER_MODEL, matchUnresolvedNames } from "./openrouter-mat
         background: #f8f8f8;
         cursor: pointer;
       }
+
+      #settingsButton-pimpMyWolt {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        width: 20px;
+        height: 20px;
+        margin: 0;
+        padding: 0;
+        font-size: 16px;
+        line-height: 1;
+        z-index: 1000;
+        border: none;
+      }
+
+      #settingsButton-pimpMyWolt:hover {
+        background: #d2d2d2;
+      }
     </style>
     <div class="container-pimpMyWolt">
+      <button id="settingsButton-pimpMyWolt" class="btn-pimpMyWolt" aria-label="הגדרות התוסף" title="הגדרות התוסף">⚙️</button>
       <div class="buttons-pimpMyWolt">
         <button id="selectGuestsButton-pimpMyWolt" class="btn-pimpMyWolt">הוסף חברים 👨🏾‍🤝‍👨🏼 </button>
         <button id="splitPayButton-pimpMyWolt" class="btn-pimpMyWolt">הכנס סכומים 💰</button>
@@ -272,6 +291,9 @@ import { DEFAULT_OPENROUTER_MODEL, matchUnresolvedNames } from "./openrouter-mat
 
     container.innerHTML = selectGuestsButtonHtml;
 
+    container.querySelector(`#settingsButton-pimpMyWolt`).addEventListener("click", () => {
+      chrome.runtime.sendMessage({ type: "open-options-page" });
+    });
     container.querySelector(`#selectGuestsButton-pimpMyWolt`).addEventListener("click", async () => {
       const { missingGuests } = await selectGuestsFn();
       const missingGuestListItems = missingGuests.map((guest) => `<li>${guest.name}: ${guest.price}₪</li>`);
