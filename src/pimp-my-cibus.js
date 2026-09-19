@@ -68,7 +68,7 @@ import { DEFAULT_OPENROUTER_MODEL, matchUnresolvedNames } from "./openrouter-mat
     const { openRouterApiKey, openRouterModel } = await new Promise((resolve) => {
       chrome.storage.local.get(["openRouterApiKey", "openRouterModel"], resolve);
     });
-    if (!openRouterApiKey) return [];
+    if (!openRouterApiKey) return null;
 
     return matchUnresolvedNames({
       woltNames,
@@ -106,6 +106,7 @@ import { DEFAULT_OPENROUTER_MODEL, matchUnresolvedNames } from "./openrouter-mat
     const newMatches = unresolvedWoltNames.length > 0
       ? await getAutoMatch({ woltNames: unresolvedWoltNames, cibusNames: allCibusFriends })
       : [];
+    if (newMatches === null) return null;
     const autoMatching = [...cachedMatches, ...newMatches];
 
     if (newMatches.length > 0) {
@@ -295,7 +296,19 @@ import { DEFAULT_OPENROUTER_MODEL, matchUnresolvedNames } from "./openrouter-mat
       chrome.runtime.sendMessage({ type: "open-options-page" });
     });
     container.querySelector(`#selectGuestsButton-pimpMyWolt`).addEventListener("click", async () => {
-      const { missingGuests } = await selectGuestsFn();
+      const selection = await selectGuestsFn();
+      if (selection === null) {
+        container.querySelector(`#status-pimpMyWolt`).innerHTML = `
+          <span>כדי להתאים שמות אוטומטית, הגדירו מפתח OpenRouter API ב-<a href="#" id="auto-match-settings-link">הגדרות</a>. אפשר גם להוסיף התאמות שמות ידנית בהגדרות.</span>
+        `;
+        container.querySelector("#auto-match-settings-link").addEventListener("click", (event) => {
+          event.preventDefault();
+          chrome.runtime.sendMessage({ type: "open-options-page" });
+        });
+        return;
+      }
+
+      const { missingGuests } = selection;
       const missingGuestListItems = missingGuests.map((guest) => `<li>${guest.name}: ${guest.price}₪</li>`);
 
       let statusMessage;
@@ -431,10 +444,16 @@ import { DEFAULT_OPENROUTER_MODEL, matchUnresolvedNames } from "./openrouter-mat
 
   const allCibusFriends = getAllCibusNames();
   const guestDebs = await fetchGuestsDebts();
-  const { matchedGuests, missingGuests } = await matchGuestsToCibus(guestDebs, allCibusFriends);
 
   setContent(getUi({
-    selectGuestsFn: () => selectGuestsFromMenu(matchedGuests, allCibusFriends, missingGuests),
-    splitPayFn: () => setGuestsDebts(matchedGuests, allCibusFriends),
+    selectGuestsFn: async () => {
+      const matches = await matchGuestsToCibus(guestDebs, allCibusFriends);
+      if (matches === null) return null;
+      return selectGuestsFromMenu(matches.matchedGuests, allCibusFriends, matches.missingGuests);
+    },
+    splitPayFn: async () => {
+      const matches = await matchGuestsToCibus(guestDebs, allCibusFriends);
+      if (matches !== null) await setGuestsDebts(matches.matchedGuests, allCibusFriends);
+    },
   }));
 })();
