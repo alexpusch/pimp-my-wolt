@@ -1,4 +1,5 @@
 import { CIBUS_MATCH_CACHE_KEY, addMatchesToCache, getCachedMatches } from "./cibus-match-cache.js";
+import { matchNamesHeuristically } from "./heuristic-matcher.js";
 import { DEFAULT_OPENROUTER_MODEL, matchUnresolvedNames } from "./openrouter-matcher.js";
 
 (async function () {
@@ -68,7 +69,7 @@ import { DEFAULT_OPENROUTER_MODEL, matchUnresolvedNames } from "./openrouter-mat
     const { openRouterApiKey, openRouterModel } = await new Promise((resolve) => {
       chrome.storage.local.get(["openRouterApiKey", "openRouterModel"], resolve);
     });
-    if (!openRouterApiKey) return null;
+    if (!openRouterApiKey) return matchNamesHeuristically(woltNames, cibusNames);
 
     return matchUnresolvedNames({
       woltNames,

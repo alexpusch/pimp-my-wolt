@@ -8,7 +8,7 @@
     },
     "scripts": {
         "build": "node scripts/build.mjs",
-        "test": "node --test tests/openrouter-matcher.test.mjs",
+        "test": "node --test tests/openrouter-matcher.test.mjs tests/heuristic-matcher.test.mjs",
         "test:integration": "node --test tests/openrouter.integration.test.mjs",
         "package": "npm run build && node scripts/package.mjs",
         "release:patch": "npm version patch"
