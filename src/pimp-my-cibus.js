@@ -17,8 +17,7 @@ import { DEFAULT_OPENROUTER_MODEL, matchUnresolvedNames } from "./openrouter-mat
     "assets/icons/pimp-my-wolt-icon-128.png"
   );
   const loaderUrl = chrome.runtime.getURL("/assets/loader.gif");
-  const { groupManager, biLogger } = window.pimpMyWolt;
-
+  
   const isHebrewCibus = !!getElementWithText("div", "עברית")
   const getCurrentLanguage = (english, hebrew) => isHebrewCibus ? hebrew : english
 
