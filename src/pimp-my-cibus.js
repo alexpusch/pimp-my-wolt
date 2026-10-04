@@ -32,7 +32,7 @@ import { DEFAULT_OPENROUTER_MODEL, matchUnresolvedNames } from "./openrouter-mat
     paymentButton() { return getElementWithText("button", texts.paymentButton) },
     splitPaymentWithFriendsToggle() { return document.querySelector("app-toggle-button .ng-toggle-switch-button") },
     addFriendsToShareButton() { return getElementWithText("a", texts.addFriendToShareButton) },
-    chooseFriendButton() { return document.querySelector(".mat-menu-trigger:not(.hid)") },
+    chooseFriendButton() { return document.querySelector(".mat-mdc-menu-trigger:not(.hid)") }, 
     chooseFriendDeleteButton() {
       return this.chooseFriendButton().closest("tr").querySelector(".del")
     },
